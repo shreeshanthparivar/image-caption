@@ -1,166 +1,1295 @@
 <!DOCTYPE html>
 <html lang="en">
+
+
+<!-- Mirrored from up2client.com/envato/ciri-ai/html/main/OnePage-CiriAI/ by HTTrack Website Copier/3.x [XR&CO'2014], Sat, 05 Apr 2025 23:33:17 GMT -->
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CaptionGenius</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Tj8M4rQZQQviCf0m2d8uFomx/NnZ1QyVZbVPnM4wafZ9Qn9nF8ld5zV1y8N4KYVK" crossorigin="anonymous">
-  <style>
-    body { background: #0d1117; color: #f8f9fa; }
-    .card { background: #111827; border-color: rgba(255,255,255,.08); }
-    .btn-primary { background: #665dff; border: none; }
-    .form-label { color: #d1d5db; }
-    .alert { border-radius: .75rem; }
-    .footer-text { color: #9ca3af; }
-  </style>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>CaptionGenius</title>
+   <link rel="icon" type="image/x-icon" href="../static/assets/images/svg/favicon.svg">
+   <link rel="stylesheet" href="../static/assets/css/swap.css">
+   <link rel="stylesheet" href="../static/assets/css/bootstrap.min.css">
+   <link rel="stylesheet" href="../static/assets/css/slick.css">
+   <link rel="stylesheet" href="../static/assets/css/style.css">
+   <link rel="stylesheet" href="../static/assets/css/media_query.css">
+   <!-- SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<style>
+   .loader-overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      display: none;
+   }
+
+   .loader {
+      border: 6px solid #f3f3f3;
+      border-top: 6px solid #5c33ff;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      animation: spin 1s linear infinite;
+   }
+
+   @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+   }
+</style>
+
+
 </head>
+
 <body>
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark border-bottom border-secondary-subtle">
-    <div class="container">
-      <a class="navbar-brand fw-bold" href="/">CaptionGenius</a>
-      <div class="d-flex gap-2 align-items-center">
-        {% if session.get('user_id') %}
-          <span class="text-light me-2">Hello, {{ session.username }}</span>
-          <a class="btn btn-outline-light btn-sm" href="/logout">Logout</a>
-        {% else %}
-          <button class="btn btn-outline-light btn-sm" data-bs-toggle="modal" data-bs-target="#loginModal">Login</button>
-          <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#registerModal">Register</button>
-        {% endif %}
+
+   <div class="loader-overlay" id="loader">
+      <div class="loader"></div>
+   </div>
+   
+
+
+   {% with messages = get_flashed_messages(with_categories=true) %}
+   {% if messages %}
+     <script>
+       {% for category, message in messages %}
+         Swal.fire({
+           icon: '{{ 'success' if category == 'success' else 'error' if category == 'error' else 'info' }}',
+           title: '{{ category.capitalize() }}',
+           text: '{{ message }}',
+           confirmButtonColor: '#3085d6',
+           confirmButtonText: 'OK'
+         });
+       {% endfor %}
+     </script>
+   {% endif %}
+ {% endwith %}
+ 
+
+   <!-- ====================================== Loader ===================================== -->
+   <div class="page-loader">
+      <div class="spinner">
+         <div></div>
+         <div></div>
+         <div></div>
+         <div></div>
+         <div></div>
+         <div></div>
       </div>
-    </div>
-  </nav>
-
-  <div class="container py-5">
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        {% for category, message in messages %}
-          <div class="alert alert-{{ 'success' if category == 'success' else 'danger' if category == 'error' else 'info' }} alert-dismissible fade show" role="alert">
-            <strong>{{ category|capitalize }}:</strong> {{ message }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-          </div>
-        {% endfor %}
-      {% endif %}
-    {% endwith %}
-
-    <div class="row gy-4">
-      <div class="col-lg-5">
-        <div class="card shadow-sm p-4">
-          <h1 class="h4 mb-3">AI Image Captioning</h1>
-          <p class="text-secondary">Upload an image to generate a caption, translate it into Hindi, Kannada, and Malayalam, play audio, and detect the emotion.</p>
-
-          {% if session.get('user_id') %}
+      <p>CaptionGenius</p>
+   </div>
+   <!-- ====================================== Header ===================================== -->
+   <div class="overlay" onclick="toggleMenu()"></div>
+   <header id="top-navbar" class="top-navbar">
+      <div class="container">
+         <nav>
+            <a href="index-2.html" class="logo">
+               <img src="../static/assets/images/home-page/image.png" alt="logo" style="width:50px;height:50px;">
+              <span style="color:white;font-weight:900;font-size:24px;">CaptionGenius</span> 
+            </a>
+            <div class="menu-icon" onclick="toggleMenu()">
+               <img src="../static/assets/images/svg/menu.svg" alt="menu">
+            </div>
+            <div class="nav-links-mn">
+               <ul class="nav-links">
+                  <li class="d-flex justify-content-center w-100">
+                     <a href="index-2.html" class="side-menu-logo">
+                        <img src="../static/assets/images/svg/logo.svg" alt="logo">
+                     </a>
+                  </li>
+                  <li><a class="a-link" href="#home">Home</a></li>
+                  <li><a class="a-link" href="#features">Features</a></li>
+                  <li><a class="a-link" href="#about">About</a></li>
+              
+                  <li><a class="a-link" href="#faq">FAQs</a></li>
+                  <li><a class="a-link" href="#blog">Blog</a></li>
+                  <li><a class="a-link" href="#contact">Contact</a></li>
+               </ul>
+               <div class="header-buttons-main">
+                  {% if session['user_id'] %}
+                  <a href="/logout" class="button2" >
+                     <span>Logout</span>
+                  </a>{% else %}
+                  <a href="#" class="button2" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                     <span>Login</span>
+                  </a>
+                  {% endif %}
+                
+                  <a href="#home" class="button"> Get Started
+                     <span class="hoverEffect">
+                        <span></span>
+                     </span>
+                  </a>
+               </div>
+            </div>
+         </nav>
+      </div>
+   </header>
+   <!-- ====================================== Section One ===================================== -->
+   <section class="section-one position-relative" id="home">
+      <img class="blue-gardient1" src="../static/assets/images/home-page/blue-gardient1.png" alt="blue-gardient1">
+      <img class="blue-gardient2" src="../static/assets/images/home-page/blue-gardient2.png" alt="blue-gardient2">
+   
+      <div class="container">
+         <p class="elevate">Discover the Magic of AI</p>
+         <h1 class="bestAI">Smart Image Captioning & More</h1>
+         <p class="olut">
+            Upload an image to get an AI-generated caption, listen to it, translate it into your language, and understand the emotion behind the text.
+         </p>
+   
+         <div class="inputGenerate">
             <form method="POST" enctype="multipart/form-data">
-              <div class="mb-3">
-                <label for="image" class="form-label">Select image</label>
-                <input class="form-control form-control-dark" type="file" id="image" name="image" accept="image/*" required>
-              </div>
-              <button class="btn btn-primary w-100" type="submit">Generate Caption</button>
+               <div style="display:flex;align-items:baseline;">
+               <input type="file" name="image"  accept="image/*" required>
+               <button type="submit" class="button generate-btn" style="height:50px;">Generate 
+                  <span class="hoverEffect"><span></span></span>
+               </button>
+            </div>
             </form>
-          {% else %}
-            <div class="alert alert-info">
-              Please log in or register to generate captions.
+         </div>
+
+         {% if image_url %}
+         <div class="row whyChooseSec">
+            <div class="col-xxl-6 col-xl-6 col-lg-6">
+               <h2 class="sec-heding whyChoose"><span>Generated Caption:</span><br/> {{ caption }}</h2>
+               <div class="blog-img-box">
+                  <img class="blog-img" src="{{ image_url }}" alt="blog-img2">
+                 
+               </div>
+ 
+               <div class="tryImage-btn-main grnezQ">
+                  <h2 class="sec-heding quest"><span> Detected Emotion:</span><br> {{ emotion }}</h2>
+               </div>
             </div>
-            <div class="d-grid gap-2">
-              <button class="btn btn-outline-light" data-bs-toggle="modal" data-bs-target="#loginModal">Login</button>
-              <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#registerModal">Register</button>
+            <div class="col-xxl-6 col-xl-6 col-lg-6">
+
+               <h4 style="color:white;">🈯 Translations + Audio:</h4>
+               <br/>
+               <br/>
+
+
+               {% for lang, translation in translations.items() %}
+               <div class="exce-box">
+                  <span class="exce-box-ciecl" id="exce-box1"></span>
+                  <div class="excellent">
+                     <p><img src="../static/assets/images/svg/lang.png" style="width:50px;height:50px;" alt="excellent">{{ lang }}:</p>
+                     <br/>
+                     <br/>
+                     <h3 class="rnaip">{{ translation }}</h3>
+                  </div>
+                  <br/>
+                  {% if audio_paths[lang] %}
+                  <audio controls>
+                     <source src="{{ audio_paths[lang] }}" type="audio/mp3">
+                     Your browser does not support the audio element.
+                   </audio>
+                 {% endif %}
+               </div>
+               {% endfor %}
+               
             </div>
-          {% endif %}
-        </div>
+         </div>
+
+         {% endif %}     
+
+
+   
+         <div class="hometags-main">
+            <p class="popTg">Features:</p>
+            <a href="#" class="hometags">Caption</a>
+            <a href="#" class="hometags">Translate</a>
+            <a href="#" class="hometags">Listen</a>
+            <a href="#" class="hometags">Emotion</a>
+         </div>
       </div>
-
-      <div class="col-lg-7">
-        {% if image_url %}
-          <div class="card shadow-sm p-4 mb-4">
-            <div class="row g-4">
-              <div class="col-md-6">
-                <img src="{{ image_url }}" alt="Uploaded image" class="img-fluid rounded">
-              </div>
-              <div class="col-md-6">
-                <h2 class="h5">Generated Caption</h2>
-                <p class="fs-6">{{ caption }}</p>
-                <p class="mb-0"><strong>Emotion:</strong> {{ emotion }}</p>
-              </div>
-            </div>
-          </div>
-
-          <div class="card shadow-sm p-4">
-            <h2 class="h5 mb-3">Translations</h2>
-            {% for lang, translation in translations.items() %}
-              <div class="mb-4">
-                <h3 class="h6 text-white">{{ lang }}</h3>
-                <p class="text-secondary">{{ translation }}</p>
-                {% if audio_paths[lang] %}
-                  <audio controls class="w-100 mt-2">
-                    <source src="{{ audio_paths[lang] }}" type="audio/mp3">
-                    Your browser does not support the audio element.
-                  </audio>
-                {% endif %}
-              </div>
-            {% else %}
-              <p class="text-secondary">No translations available yet.</p>
-            {% endfor %}
-          </div>
-        {% endif %}
+   
+      <div class="photo-gallery">
+         <div class="single-img">
+            <img src="../static/assets/images/home-page/slider1-img1.jpg" alt="slider1-img1">
+         </div>
+         <div class="single-img multi-img">
+            <img src="../static/assets/images/home-page/slider1-img3.jpg" alt="slider1-img3">
+            <img src="../static/assets/images/home-page/slider1-img4.jpg" alt="slider1-img4">
+         </div>
+         <div class="single-img">
+            <img src="../static/assets/images/home-page/slider1-img2.jpg" alt="slider1-img2">
+         </div>
+         <div class="single-img multi-img">
+            <img src="../static/assets/images/home-page/slider1-img5.jpg" alt="slider1-img5">
+            <img src="../static/assets/images/home-page/slider1-img6.jpg" alt="slider1-img6">
+         </div>
+         <div class="single-img">
+            <img src="../static/assets/images/home-page/slider1-img9.jpg" alt="slider1-img9">
+         </div>
+         <div class="single-img multi-img">
+            <img src="../static/assets/images/home-page/slider1-img7.jpg" alt="slider1-img7">
+            <img src="../static/assets/images/home-page/slider1-img8.jpg" alt="slider1-img8">
+         </div>
+         <div class="single-img">
+            <img src="../static/assets/images/home-page/slider1-img10.jpg" alt="slider1-img10">
+         </div>
+         <div class="single-img multi-img">
+            <img src="../static/assets/images/home-page/slider1-img11.jpg" alt="slider1-img11">
+            <img src="../static/assets/images/home-page/slider1-img12.jpg" alt="slider1-img12">
+         </div>
       </div>
-    </div>
-  </div>
-
-  <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content bg-dark text-light border-secondary">
-        <div class="modal-header">
-          <h5 class="modal-title" id="loginModalLabel">Login</h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <form method="POST" action="/login">
-            <div class="mb-3">
-              <label for="loginEmail" class="form-label">Email</label>
-              <input type="email" class="form-control form-control-dark" id="loginEmail" name="email" required>
+   </section>
+   
+   <!-- ====================================== Section Two ===================================== -->
+   <section class="section-two position-relative" id="features">
+      <img class="round-gradient1" src="../static/assets/images/home-page/round-gradient1.png" alt="round-gradient1">
+      <div class="container">
+         <h2 class="sec-heding">Our <span>Features</span></h2>
+         <p class="sub-heding">
+            Explore powerful features designed to enhance your experience with AI-driven image captioning, translation, audio, and emotion recognition.
+         </p>
+         <div class="row home-features-row">
+            <div class="col-xxl-4 col-xl-4 col-lg-4 col-md-6">
+               <div class="features-cir-main">
+                  <div class="features-cir">
+                     <img src="../static/assets/images/svg/features1.svg" alt="features1">
+                  </div>
+                  <span class="img-bg-circle"></span>
+               </div>
+               <h3 class="gendseratio">Accurate Image Captioning</h3>
+               <p class="eugiat">
+                  Automatically generate clear and meaningful captions for your images using deep learning.
+               </p>
             </div>
-            <div class="mb-3">
-              <label for="loginPassword" class="form-label">Password</label>
-              <input type="password" class="form-control form-control-dark" id="loginPassword" name="password" required>
+            <div class="col-xxl-4 col-xl-4 col-lg-4 col-md-6">
+               <div class="features-cir-main">
+                  <div class="features-cir">
+                     <img src="../static/assets/images/svg/features2.svg" alt="features2">
+                  </div>
+                  <span class="img-bg-circle"></span>
+               </div>
+               <h3 class="gendseratio">Smart AI Translation</h3>
+               <p class="eugiat">
+                  Instantly translate captions into multiple languages with high accuracy and natural flow.
+               </p>
             </div>
-            <button type="submit" class="btn btn-primary w-100">Login</button>
-          </form>
-        </div>
+            <div class="col-xxl-4 col-xl-4 col-lg-4 col-md-6">
+               <div class="features-cir-main">
+                  <div class="features-cir">
+                     <img src="../static/assets/images/svg/features3.svg" alt="features3">
+                  </div>
+                  <span class="img-bg-circle"></span>
+               </div>
+               <h3 class="gendseratio">Responsive Across Devices</h3>
+               <p class="eugiat">
+                  Fully optimized for mobile, tablet, and desktop—enjoy a smooth experience everywhere.
+               </p>
+            </div>
+            <div class="col-xxl-4 col-xl-4 col-lg-4 col-md-6">
+               <div class="features-cir-main">
+                  <div class="features-cir">
+                     <img src="../static/assets/images/svg/features4.svg" alt="features4">
+                  </div>
+                  <span class="img-bg-circle"></span>
+               </div>
+               <h3 class="gendseratio">Intuitive User Interface</h3>
+               <p class="eugiat">
+                  A simple and elegant interface designed for ease of use and quick access to results.
+               </p>
+            </div>
+            <div class="col-xxl-4 col-xl-4 col-lg-4 col-md-6">
+               <div class="features-cir-main">
+                  <div class="features-cir">
+                     <img src="../static/assets/images/svg/features5.svg" alt="features5">
+                  </div>
+                  <span class="img-bg-circle"></span>
+               </div>
+               <h3 class="gendseratio">Download & Save</h3>
+               <p class="eugiat">
+                  Easily save generated captions or translated text for future reference or sharing.
+               </p>
+            </div>
+            <div class="col-xxl-4 col-xl-4 col-lg-4 col-md-6">
+               <div class="features-cir-main">
+                  <div class="features-cir">
+                     <img src="../static/assets/images/svg/features6.svg" alt="features6">
+                  </div>
+                  <span class="img-bg-circle"></span>
+               </div>
+               <h3 class="gendseratio">Free & Flexible Use</h3>
+               <p class="eugiat">
+                  Use the core features for free, with options to upgrade for more advanced capabilities.
+               </p>
+            </div>
+         </div>
       </div>
-    </div>
-  </div>
-
-  <div class="modal fade" id="registerModal" tabindex="-1" aria-labelledby="registerModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content bg-dark text-light border-secondary">
-        <div class="modal-header">
-          <h5 class="modal-title" id="registerModalLabel">Register</h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <form method="POST" action="/register">
-            <div class="mb-3">
-              <label for="registerUsername" class="form-label">Username</label>
-              <input type="text" class="form-control form-control-dark" id="registerUsername" name="username" required>
-            </div>
-            <div class="mb-3">
-              <label for="registerEmail" class="form-label">Email</label>
-              <input type="email" class="form-control form-control-dark" id="registerEmail" name="email" required>
-            </div>
-            <div class="mb-3">
-              <label for="registerPassword" class="form-label">Password</label>
-              <input type="password" class="form-control form-control-dark" id="registerPassword" name="password" required>
-            </div>
-            <div class="mb-3">
-              <label for="registerConfirmPassword" class="form-label">Confirm Password</label>
-              <input type="password" class="form-control form-control-dark" id="registerConfirmPassword" name="confirm_password" required>
-            </div>
-            <button type="submit" class="btn btn-primary w-100">Register</button>
-          </form>
-        </div>
+   </section>
+   
+   <!-- ====================================== Section Three ===================================== -->
+   <section class="section-three position-relative pt-0">
+      <img class="round-gradient2" src="../static/assets/images/home-page/round-gradient2.png" alt="round-gradient2">
+      <div class="container">
+         <h2 class="ering reveal-text">
+            Empowering creativity through cutting-edge tools that help you turn your ideas into reality with ease and innovation.
+         </h2>
+         <div class="community-btn-main">
+            <a href="#subscribe" class="button"> Join Our Creative Community
+               <span class="hoverEffect">
+                  <span></span>
+               </span>
+            </a>
+         </div>
+         <p class="sub-heding glob pt-0">Trusted by 10,000+ Global Brands Around the World</p>
       </div>
-    </div>
-  </div>
-
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-7lSfn8XWyI8k1wIy0niA6pqVHgFGNdrMF0nOThrlxfKJ5s+Vg9GQqfWv0U5MuP7k" crossorigin="anonymous"></script>
+   
+      <div class="logos logos1">
+         <div class="logos-slide ltr">
+            <div class="marquee__content pt-0">
+               <div class="marquee-img-main">
+                  <img class="brand-logos" src="../static/assets/images/maquee-logo/logo1.png" alt="logo1">
+               </div>
+               <div class="marquee-img-main">
+                  <img class="brand-logos" src="../static/assets/images/maquee-logo/logo2.png" alt="logo2">
+               </div>
+               <div class="marquee-img-main">
+                  <img class="brand-logos" src="../static/assets/images/maquee-logo/logo3.png" alt="logo3">
+               </div>
+               <div class="marquee-img-main">
+                  <img class="brand-logos" src="../static/assets/images/maquee-logo/logo4.png" alt="logo4">
+               </div>
+               <div class="marquee-img-main">
+                  <img class="brand-logos" src="../static/assets/images/maquee-logo/logo5.png" alt="logo5">
+               </div>
+               <div class="marquee-img-main">
+                  <img class="brand-logos" src="../static/assets/images/maquee-logo/logo6.png" alt="logo6">
+               </div>
+               <div class="marquee-img-main">
+                  <img class="brand-logos" src="../static/assets/images/maquee-logo/logo7.png" alt="logo7">
+               </div>
+               <div class="marquee-img-main">
+                  <img class="brand-logos" src="../static/assets/images/maquee-logo/logo8.png" alt="logo8">
+               </div>
+               <div class="marquee-img-main">
+                  <img class="brand-logos" src="../static/assets/images/maquee-logo/logo9.png" alt="logo9">
+               </div>
+               <div class="marquee-img-main">
+                  <img class="brand-logos" src="../static/assets/images/maquee-logo/logo10.png" alt="logo10">
+               </div>
+            </div>
+         </div>
+      </div>
+   
+      <div class="logos">
+         <div class="logos-slide rtl">
+            <div class="marquee__content">
+               <div class="marquee-img-main">
+                  <img class="brand-logos" src="../static/assets/images/maquee-logo/logo1.png" alt="logo1">
+               </div>
+               <div class="marquee-img-main">
+                  <img class="brand-logos" src="../static/assets/images/maquee-logo/logo2.png" alt="logo2">
+               </div>
+               <div class="marquee-img-main">
+                  <img class="brand-logos" src="../static/assets/images/maquee-logo/logo3.png" alt="logo3">
+               </div>
+               <div class="marquee-img-main">
+                  <img class="brand-logos" src="../static/assets/images/maquee-logo/logo4.png" alt="logo4">
+               </div>
+               <div class="marquee-img-main">
+                  <img class="brand-logos" src="../static/assets/images/maquee-logo/logo5.png" alt="logo5">
+               </div>
+               <div class="marquee-img-main">
+                  <img class="brand-logos" src="../static/assets/images/maquee-logo/logo6.png" alt="logo6">
+               </div>
+               <div class="marquee-img-main">
+                  <img class="brand-logos" src="../static/assets/images/maquee-logo/logo7.png" alt="logo7">
+               </div>
+               <div class="marquee-img-main">
+                  <img class="brand-logos" src="../static/assets/images/maquee-logo/logo8.png" alt="logo8">
+               </div>
+               <div class="marquee-img-main">
+                  <img class="brand-logos" src="../static/assets/images/maquee-logo/logo9.png" alt="logo9">
+               </div>
+               <div class="marquee-img-main">
+                  <img class="brand-logos" src="../static/assets/images/maquee-logo/logo10.png" alt="logo10">
+               </div>
+            </div>
+         </div>
+      </div>
+   </section>
+   
+   <!-- ====================================== Section Four ===================================== -->
+   <section class="section-four pt-0 position-relative">
+      <img class="blue-gardient3" src="../static/assets/images/home-page/blue-gardient3.png" alt="blue-gardient3">
+      <img class="blue-gardient4" src="../static/assets/images/home-page/blue-gardient4.png" alt="blue-gardient4">
+      <div class="container">
+         <h2 class="sec-heding"><span>Explore AI Magic</span> in 4 Simple Steps</h2>
+         <p class="sub-heding">Follow the flow from image to insight — from captions to emotions, experience AI like never before.</p>
+         <div class="wrapper cursor">
+            <div class="sugg-box"> 
+               <div class="sugg-img-main">
+                  <img class="sugg-img" src="../static/assets/images/home-page/sugg-img1.jpg" alt="sugg-img1">
+               </div>
+               <div>
+                  <p class="setpSugg">Step 1</p>
+                  <h3 class="gendseratio flex-pri">Upload an Image</h3>
+                  <p class="eugiat flex-pri">Start by uploading any image — our AI model will analyze and describe it with a smart caption.</p>
+                  <div class="tryImage-btn-main">
+                     <a href="#" class="button"> Try Now
+                        <span class="hoverEffect">
+                           <span></span>
+                        </span>
+                     </a>
+                  </div>
+               </div>
+            </div>
+            <div class="sugg-box">
+               <div class="sugg-img-main">
+                  <img class="sugg-img" src="../static/assets/images/home-page/sugg-img2.jpg" alt="sugg-img2">
+               </div>
+               <div>
+                  <p class="setpSugg">Step 2</p>
+                  <h3 class="gendseratio flex-pri">Translate the Caption</h3>
+                  <p class="eugiat flex-pri">Select your preferred language to instantly translate the generated caption with high accuracy.</p>
+                  <div class="tryImage-btn-main">
+                     <a href="#" class="button"> Try Now
+                        <span class="hoverEffect">
+                           <span></span>
+                        </span>
+                     </a>
+                  </div>
+               </div>
+            </div>
+            <div class="sugg-box">
+               <div class="sugg-img-main">
+                  <img class="sugg-img" src="../static/assets/images/home-page/sugg-img3.jpg" alt="sugg-img3">
+               </div>
+               <div>
+                  <p class="setpSugg">Step 3</p>
+                  <h3 class="gendseratio flex-pri">Convert Text to Voice</h3>
+                  <p class="eugiat flex-pri">Listen to the translated caption with our text-to-speech engine for a fully immersive experience.</p>
+                  <div class="tryImage-btn-main">
+                     <a href="#" class="button"> Try Now
+                        <span class="hoverEffect">
+                           <span></span>
+                        </span>
+                     </a>
+                  </div>
+               </div>
+            </div>
+            <div class="sugg-box">
+               <div class="sugg-img-main">
+                  <img class="sugg-img" src="../static/assets/images/home-page/sugg-img3.jpg" alt="sugg-img4">
+               </div>
+               <div>
+                  <p class="setpSugg">Step 4</p>
+                  <h3 class="gendseratio flex-pri">Detect the Emotion</h3>
+                  <p class="eugiat flex-pri">Understand the emotion behind your text or caption — happy, sad, excited, and more!</p>
+                  <div class="tryImage-btn-main">
+                     <a href="#" class="button"> Try Now
+                        <span class="hoverEffect">
+                           <span></span>
+                        </span>
+                     </a>
+                  </div>
+               </div>
+            </div>
+         </div>
+      </div>
+   </section>
+   
+   <!-- ====================================== Section Five ===================================== -->
+   <section class="section-five pt-0">
+      <div class="logos sldkjf">
+         <div class="logos-slide ltr">
+            <div class="marquee__content pt-0">
+               <div class="vis-tex vis-tex1">
+                  <img class="brand-logos" src="../static/assets/images/home-page/flower.png" alt="logo1">
+                  <h2>Take Your Visuals to the</h2>
+               </div>
+               <div class="vis-tex vis-tex2">
+                  <img class="brand-logos" src="../static/assets/images/home-page/flower.png" alt="logo2">
+                  <h2>AI Image Generator</h2>
+               </div>
+               <div class="vis-tex vis-tex3">
+                  <img class="brand-logos" src="../static/assets/images/home-page/flower.png" alt="logo3">
+                  <h2>Next Level</h2>
+               </div>
+               <div class="vis-tex vis-tex2">
+                  <img class="brand-logos" src="../static/assets/images/home-page/flower.png" alt="logo2">
+                  <h2>AI Image Generator</h2>
+               </div>
+            </div>
+         </div>
+      </div>
+   </section>
+   <!-- ====================================== Section Six ===================================== -->
+   <section class="section-six pt-0  overflow-hidden" id="about">
+      <div class="container">
+         <h2 class="sec-heding">Intelligent AI Features for <span>Creative Image Generation</span></h2>
+         <p class="sub-heding">We’re driven by the mission to empower users with cutting-edge tools that turn simple text prompts into stunning visual creations through AI.</p>
+         <div class="row marketingRow">
+            <div class="col-xxl-6 col-xl-6">
+               <p class="dui pb-2">Our AI image generation tool understands context and creativity, converting your words into visuals that match your imagination. It’s built to simplify the process of visual content creation for designers, marketers, and innovators alike.</p>
+               <p class="dui">From concept to canvas, our system bridges the gap between ideas and imagery. Whether you're creating marketing assets, visual art, or product mockups, our AI ensures precision, speed, and style in every output.</p>
+            </div>
+            <div class="col-xxl-6 col-xl-6">
+               <div class="quis-head">
+                  <div class="features-cir-main quis-main">
+                     <div class="features-cir quis">
+                        <img src="../static/assets/images/svg/check.svg" alt="check">
+                     </div>
+                     <span class="img-bg-circle quis-bg-cir"></span>
+                  </div>
+                  <h3 class="quis-text-list">Generate visuals instantly from text prompts</h3>
+               </div>
+               <div class="quis-head">
+                  <div class="features-cir-main quis-main">
+                     <div class="features-cir quis">
+                        <img src="../static/assets/images/svg/check.svg" alt="check">
+                     </div>
+                     <span class="img-bg-circle quis-bg-cir"></span>
+                  </div>
+                  <h3 class="quis-text-list">Choose from multiple artistic styles and themes</h3>
+               </div>
+               <div class="quis-head">
+                  <div class="features-cir-main quis-main">
+                     <div class="features-cir quis">
+                        <img src="../static/assets/images/svg/check.svg" alt="check">
+                     </div>
+                     <span class="img-bg-circle quis-bg-cir"></span>
+                  </div>
+                  <h3 class="quis-text-list">Optimize image resolution with advanced enhancement</h3>
+               </div>
+               <div class="quis-head mb-0">
+                  <div class="features-cir-main quis-main">
+                     <div class="features-cir quis">
+                        <img src="../static/assets/images/svg/check.svg" alt="check">
+                     </div>
+                     <span class="img-bg-circle quis-bg-cir"></span>
+                  </div>
+                  <h3 class="quis-text-list">Built for creators, developers, and digital artists</h3>
+               </div>
+            </div>
+         </div>
+         <div class="video-container">
+            <img class="blue-gardient6" src="../static/assets/images/home-page/blue-gardient6.png" alt="blue-gardient6">
+            <img class="blue-gardient5" src="../static/assets/images/home-page/blue-gardient5.png" alt="blue-gardient5">
+            <video autoplay loop muted class="home-sec-one-video">
+               <source src="../static/assets/video/video1.mp4" type="video/mp4">
+            </video>
+            <div class="text-circle-main">
+               <img class="bg-down-arrow panda" src="../static/assets/images/home-page/about.jpg" alt="bg-down-arrow">
+            </div>
+         </div>
+         <div class="row whyChooseSec">
+            <div class="col-xxl-6 col-xl-6 col-lg-6">
+               <h2 class="sec-heding whyChoose"><span>Why Choose Us:</span> Empower Your Imagination with AI</h2>
+               <p class="dui pb-2">Our AI-powered text-to-image platform transforms simple text prompts into stunning visuals—bridging the gap between words and imagination. No design skills needed.</p>
+               <p class="dui">Whether you're designing for marketing, education, social media, or personal creativity, our platform adapts to your needs, generating high-quality images in seconds.</p>
+               <div class="tryImage-btn-main grnezQ">
+                  <a href="#" class="button"> Generate Your Image
+                     <span class="hoverEffect">
+                        <span></span>
+                     </span>
+                  </a>
+               </div>
+            </div>
+            <div class="col-xxl-6 col-xl-6 col-lg-6">
+               <div class="exce-box">
+                  <span class="exce-box-ciecl" id="exce-box1"></span>
+                  <div class="excellent">
+                     <p><img src="../static/assets/images/svg/excellent.svg" alt="excellent">Fast & Seamless Generation</p>
+                  </div>
+                  <h3 class="rnaip">Generate high-quality visuals in real-time with optimized AI performance.</h3>
+               </div>
+               <div class="exce-box">
+                  <span class="exce-box-ciecl" id="exce-box2"></span>
+                  <div class="excellent">
+                     <p><img src="../static/assets/images/svg/reliable.svg" alt="reliable">Intelligent Prompt Handling</p>
+                  </div>
+                  <h3 class="rnaip">Our AI accurately interprets complex text prompts to generate relevant, artistic content.</h3>
+               </div>
+               <div class="exce-box mb-0">
+                  <span class="exce-box-ciecl" id="exce-box3"></span>
+                  <div class="excellent">
+                     <p><img src="../static/assets/images/svg/unique.svg" alt="unique">Versatile Output Options</p>
+                  </div>
+                  <h3 class="rnaip">Choose from different styles, resolutions, and formats to suit your creative needs.</h3>
+               </div>
+            </div>
+         </div>
+         
+      </div>
+   </section>
+   
+   <!-- ====================================== Section Seven ===================================== -->
+   <section class="section-seven position-relative">
+      <img class="slider-gardient-blue" src="../static/assets/images/home-page/blue-gardient6.png" alt="blue-gardient6">
+      <img class="slider-gardient-blue2" src="../static/assets/images/home-page/blue-gardient2.png" alt="blue-gardient2">
+      <div class="container">
+         <h2 class="sec-heding people-sa">What Creatives People Are <span>Saying About Us</span></h2>
+         <p class="sub-heding">In user speeches about Power AI on our image generator site, creativity takes the
+            stage, showcasing the visual brilliance this tool unlocks.</p>
+         <div class="sayAboutSlider">
+            <div class="slide-box">
+               <div class="d-flex justify-content-center">
+                  <img src="../static/assets/images/home-page/star.png" alt="star">
+               </div>
+               <h2 class="beco">“The AI Image Generator has become my not-so-secret weapon in the world of
+                  marketing. It's a game-changer for creating captivating visuals that leave a lasting impression
+                  on our audience.”
+               </h2>
+               <p class="hoea">John Reynolds</p>
+               <p class="mave">Marketing Maven at Peak Promotions</p>
+            </div>
+            <div class="slide-box">
+               <div class="d-flex justify-content-center">
+                  <img src="../static/assets/images/home-page/star.png" alt="star">
+               </div>
+               <h2 class="beco">“Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet consectetur,
+                  adipisci velit, sed quia non numquam eius tempora in labore et dolore magnam aliquam quaerat
+                  voluptatem sed quia numquam”
+               </h2>
+               <p class="hoea">Andrew Lewis</p>
+               <p class="mave">Marketing Maven at Peak Promotions</p>
+            </div>
+            <div class="slide-box">
+               <div class="d-flex justify-content-center">
+                  <img src="../static/assets/images/home-page/star.png" alt="star">
+               </div>
+               <h2 class="beco">“The AI Image Generator has become my not-so-secret weapon in the world of
+                  marketing. It's a game-changer for creating captivating visuals that leave a lasting impression
+                  on our audience.”
+               </h2>
+               <p class="hoea">Dan Sawyer</p>
+               <p class="mave">Marketing Maven at Peak Promotions</p>
+            </div>
+            <div class="slide-box">
+               <div class="d-flex justify-content-center">
+                  <img src="../static/assets/images/home-page/star.png" alt="star">
+               </div>
+               <h2 class="beco">“Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet consectetur,
+                  adipisci velit, sed quia non numquam eius tempora in labore et dolore magnam aliquam quaerat
+                  voluptatem sed quia numquam”
+               </h2>
+               <p class="hoea">Robert Alikson </p>
+               <p class="mave">Marketing Maven at Peak Promotions</p>
+            </div>
+         </div>
+      </div>
+      <img class="client-img1" src="../static/assets/images/home-page/client-img1.jpg" alt="client-img1">
+      <img class="client-img2" src="../static/assets/images/home-page/client-img2.jpg" alt="client-img2">
+      <img class="client-img3" src="../static/assets/images/home-page/client-img3.jpg" alt="client-img3">
+      <img class="client-img4" src="../static/assets/images/home-page/client-img4.jpg" alt="client-img4">
+      <img class="client-img5" src="../static/assets/images/home-page/client-img5.jpg" alt="client-img5">
+      <img class="client-img6" src="../static/assets/images/home-page/client-img6.jpg" alt="client-img6">
+   </section>
+   <!-- ====================================== Section Eight ===================================== -->
+   {#<section class="section-eight pt-0" id="pricing">
+      <div class="overflow-hidden">
+         <svg class="curve-svg" xmlns="http://www.w3.org/2000/svg" width="1920" height="102" viewBox="0 0 1920 102"
+            fill="none">
+            <path d="M0 101C0 101 423.5 1 960 1C1496.5 1 1920 101 1920 101" stroke="url(#paint0_linear_82_634)"
+               stroke-width="2" />
+            <defs>
+               <linearGradient id="paint0_linear_82_634" x1="0" y1="51" x2="1920" y2="51"
+                  gradientUnits="userSpaceOnUse">
+                  <stop offset="0.1" stop-color="#02000B" />
+                  <stop offset="0.495" stop-color="white" />
+                  <stop offset="0.9" stop-color="#02000B" />
+               </linearGradient>
+            </defs>
+         </svg>
+      </div>
+      <div class="container">
+         <h2 class="sec-heding">Get A<span> Special Price</span> For You</h2>
+         <p class="sub-heding">Congue sed pharetra proin purus quis vehicula sit. In bibendum volutpat dictum
+            pulvinar faucibus nulla. Neque sed augue praesent tristique ac gravida commodo.</p>
+         <nav class="tabs-btn">
+            <a href="javascript:void(0);" data-tab="one" class="monthly active">Monthly</a>
+            <a href="javascript:void(0);" data-tab="two" class="yearly">Annually</a>
+            <div class="clear"></div>
+         </nav>
+         <div class="tabContainer">
+            <div id="one" class="Tabcondent active">
+               <div class="row team-page-row">
+                  <div class="col-xxl-4 col-xl-4 col-lg-6 col-md-6">
+                     <div class="plan-body">
+                        <div class="plan-header">
+                           <span class="plain-greiesd-bg" id="price1"></span>
+                           <h2 class="plan-text">FREE</h2>
+                           <h3 class="plan-price">$0 <sub>/Month</sub></h3>
+                           <h3 class="basicLevelPro">Basic level performance</h3>
+                        </div>
+                        <ul>
+                           <li>Image Limit: 100 per month</li>
+                           <li>Access to Essential Templates</li>
+                           <li>Email Support Only</li>
+                           <li>Standard Resolution Output</li>
+                        </ul>
+                        <div class="pricing-btn">
+                           <a href="#" class="button"> Try For Free
+                              <span class="hoverEffect">
+                                 <span></span>
+                              </span>
+                           </a>
+                        </div>
+                     </div>
+                  </div>
+                  <div class="col-xxl-4 col-xl-4 col-lg-6 col-md-6">
+                     <div class="plan-body">
+                        <div class="plan-header">
+                           <span class="plain-greiesd-bg" id="price2"></span>
+                           <h2 class="plan-text">PREMIUM</h2>
+                           <h3 class="plan-price">$29 <sub>/Month</sub></h3>
+                           <h3 class="basicLevelPro">Professional level performance</h3>
+                        </div>
+                        <ul>
+                           <li>Unlimited Image Generation</li>
+                           <li>Exclusive Templates Library</li>
+                           <li>Priority Email and Live Chat Support</li>
+                           <li>Ultra High-Resolution Output</li>
+                        </ul>
+                        <div class="pricing-btn">
+                           <a href="#" class="button"> Get Started
+                              <span class="hoverEffect">
+                                 <span></span>
+                              </span>
+                           </a>
+                        </div>
+                     </div>
+                  </div>
+                  <div class="col-xxl-4 col-xl-4 col-lg-6 col-md-6">
+                     <div class="plan-body">
+                        <div class="plan-header">
+                           <span class="plain-greiesd-bg" id="price3"></span>
+                           <h2 class="plan-text">ENTERPRICE</h2>
+                           <h3 class="plan-price">$49 <sub>/Month</sub></h3>
+                           <h3 class="basicLevelPro">Super level performance</h3>
+                        </div>
+                        <ul>
+                           <li>Unlimited Image Generation</li>
+                           <li>Tailored Templates and Branding</li>
+                           <li>API Access for Integration</li>
+                           <li>24/7 Premium Support</li>
+                        </ul>
+                        <div class="pricing-btn">
+                           <a href="#" class="button"> Get Started
+                              <span class="hoverEffect">
+                                 <span></span>
+                              </span>
+                           </a>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            </div>
+            <div id="two" class="Tabcondent">
+               <div class="row team-page-row">
+                  <div class="col-xxl-4 col-xl-4 col-lg-6 col-md-6">
+                     <div class="plan-body">
+                        <div class="plan-header">
+                           <span class="plain-greiesd-bg" id="price4"></span>
+                           <h2 class="plan-text">Gold</h2>
+                           <h3 class="plan-price">$78 <sub>/Annually</sub></h3>
+                           <h3 class="basicLevelPro">Basic level performance</h3>
+                        </div>
+                        <ul>
+                           <li>Image Limit: 100 per month</li>
+                           <li>Access to Essential Templates</li>
+                           <li>Email Support Only</li>
+                           <li>Standard Resolution Output</li>
+                        </ul>
+                        <div class="pricing-btn">
+                           <a href="#" class="button"> Get Started
+                              <span class="hoverEffect">
+                                 <span></span>
+                              </span>
+                           </a>
+                        </div>
+                     </div>
+                  </div>
+                  <div class="col-xxl-4 col-xl-4 col-lg-6 col-md-6">
+                     <div class="plan-body">
+                        <div class="plan-header">
+                           <span class="plain-greiesd-bg" id="price5"></span>
+                           <h2 class="plan-text">PREMIUM</h2>
+                           <h3 class="plan-price">$89 <sub>/Annually</sub></h3>
+                           <h3 class="basicLevelPro">Professional level performance</h3>
+                        </div>
+                        <ul>
+                           <li>Unlimited Image Generation</li>
+                           <li>Exclusive Templates Library</li>
+                           <li>Priority Email and Live Chat Support</li>
+                           <li>Ultra High-Resolution Output</li>
+                        </ul>
+                        <div class="pricing-btn">
+                           <a href="#" class="button"> Get Started
+                              <span class="hoverEffect">
+                                 <span></span>
+                              </span>
+                           </a>
+                        </div>
+                     </div>
+                  </div>
+                  <div class="col-xxl-4 col-xl-4 col-lg-6 col-md-6">
+                     <div class="plan-body">
+                        <div class="plan-header">
+                           <span class="plain-greiesd-bg" id="price6"></span>
+                           <h2 class="plan-text">ENTERPRICE</h2>
+                           <h3 class="plan-price">$169 <sub>/Annually</sub></h3>
+                           <h3 class="basicLevelPro">Super level performance</h3>
+                        </div>
+                        <ul>
+                           <li>Unlimited Image Generation</li>
+                           <li>Tailored Templates and Branding</li>
+                           <li>API Access for Integration</li>
+                           <li>24/7 Premium Support</li>
+                        </ul>
+                        <div class="pricing-btn">
+                           <a href="#" class="button"> Get Started
+                              <span class="hoverEffect">
+                                 <span></span>
+                              </span>
+                           </a>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </div>
+      </div>
+   </section>#}
+   <!-- ====================================== Section Nine ===================================== -->
+   <section class="section-nine" id="faq" >
+      <div class="container" style="margin-top:100px;">
+         <div class="row">
+            <div class="col-xxl-5 col-xl-5 col-lg-5">
+               <h2 class="sec-heding quest"><span> Questions? </span><br> We have Answers</h2>
+               <p class="dui seci">Explore our FAQ section — your quick guide to understanding how our Image Caption Generator works and how it can help you create smart, AI-powered captions in seconds.</p>
+            </div>
+            <div class="col-xxl-7 col-xl-7 col-lg-7">
+               <div class="accordion faq" id="accordionExample">
+                  <div class="accordion-item">
+                     <h2 class="accordion-header asd" id="headingOne">
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                           data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                           How do I start using the Image Caption Generator?
+                        </button>
+                     </h2>
+                     <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne"
+                        data-bs-parent="#accordionExample">
+                        <div class="accordion-body">
+                           Simply upload an image using our platform’s interface, and the AI will instantly analyze and generate a meaningful caption. No registration required to try it out!
+                        </div>
+                     </div>
+                  </div>
+                  <div class="accordion-item">
+                     <h2 class="accordion-header asd" id="headingTwo">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                           data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                           Does the caption generator work automatically?
+                        </button>
+                     </h2>
+                     <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo"
+                        data-bs-parent="#accordionExample">
+                        <div class="accordion-body">
+                           Yes! Our tool uses deep learning models to automatically generate captions for your images within seconds, requiring no manual input or editing.
+                        </div>
+                     </div>
+                  </div>
+                  <div class="accordion-item">
+                     <h2 class="accordion-header asd" id="headingThree">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                           data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                           Do you offer any premium plans or subscriptions?
+                        </button>
+                     </h2>
+                     <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree"
+                        data-bs-parent="#accordionExample">
+                        <div class="accordion-body">
+                           We offer both free and premium plans. The premium plan provides faster processing, advanced caption customization, and bulk image support. Discounts are available for yearly subscriptions.
+                        </div>
+                     </div>
+                  </div>
+                  <div class="accordion-item">
+                     <h2 class="accordion-header asd" id="headingFour">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                           data-bs-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
+                           What should I do if the generated caption isn't accurate?
+                        </button>
+                     </h2>
+                     <div id="collapseFour" class="accordion-collapse collapse" aria-labelledby="headingFour"
+                        data-bs-parent="#accordionExample">
+                        <div class="accordion-body">
+                           While our AI is highly accurate, it's still learning. You can edit the generated caption manually or try re-uploading the image with clearer context. We also welcome feedback to improve the system.
+                        </div>
+                     </div>
+                  </div>
+                  <div class="accordion-item ">
+                     <h2 class="accordion-header asd" id="headingFive">
+                        <button class="accordion-button collapsed border-bottom-0 pb-0" type="button"
+                           data-bs-toggle="collapse" data-bs-target="#collapseFive" aria-expanded="false"
+                           aria-controls="collapseFive">
+                           Is there an API available for developers?
+                        </button>
+                     </h2>
+                     <div id="collapseFive" class="accordion-collapse collapse" aria-labelledby="headingFive"
+                        data-bs-parent="#accordionExample">
+                        <div class="accordion-body">
+                           Yes, we provide an API that developers can integrate into their applications or websites for real-time image captioning. Contact us to get access and documentation.
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </div>
+      </div>
+   </section>
+   
+   <!-- ====================================== Section Subscribe ===================================== -->
+   <section class="section-subscribe position-relative">
+      <img class="blurek" src="../static/assets/images/home-page/blue-gardient7.png" alt="blue-gardient7">
+      <img class="blurek2" src="../static/assets/images/home-page/blue-gardient5.png" alt="blue-gardient5">
+      <div class="container position-relative">
+         <img class="robot" src="../static/assets/images/home-page/robot.jpg" alt="robot">
+         <video autoplay loop muted class="home-sec-two-video2">
+            <source src="../static/assets/video/video2.mp4" type="video/mp4">
+         </video>
+         <div class="cretive-box">
+            <h2 class="sec-heding">Ready To Transform Visuals Into <br><span> Meaningful Captions & Speech?</span></h2>
+            <p class="sub-heding">Upload an image and let our AI generate accurate captions, translate them into multiple languages, detect the emotions behind the message, and even convert text into lifelike speech — all in one platform.</p>
+            <div class="community-btn-main mb-0">
+               <a href="index-2.html" class="button"> Get Started Now
+                  <span class="hoverEffect">
+                     <span></span>
+                  </span>
+               </a>
+            </div>
+         </div>
+      </div>
+   </section>
+   
+   <div class="subs-sec" id="subscribe">
+      <div class="container">
+         <div class="row fassd-row">
+            <div class="col-xxl-6 col-xl-6 col-lg-6">
+               <h2 class="sec-heding quest"><span> Subscribe </span><br> for Latest AI Updates!</h2>
+               <p class="dui seci">Stay in the loop with new features, updates, and insights on AI-powered image captioning, multilingual translation, emotion analysis, and speech generation.</p>
+               <div class="sub-scjsd-inp-main">
+                  <input type="text" placeholder="Enter Email Address" name="Enter Email Address" autocapitalize="off">
+                  <a href="#" class="button subscribeBtn">Subscribe
+                     <span class="hoverEffect">
+                        <span></span>
+                     </span>
+                  </a>
+               </div>
+               <div class="footer-checkbox-sec">
+                  <input class="footer-checkbox-input" id="footer-checkbox" type="checkbox">
+                  <label for="footer-checkbox" class="footer-chec-txt">I agree to the
+                     <a href="#">Privacy Policy.</a>
+                  </label>
+               </div>
+            </div>
+            <div class="col-xxl-6 col-xl-6 col-lg-6 faasd">
+               <div class="position-relative">
+                  <img class="fantasy1" src="../static/assets/images/home-page/fantasy1.jpg" alt="fantasy1">
+                  <img class="fantasy2" src="../static/assets/images/home-page/fantasy2.jpg" alt="fantasy2">
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+   
+   <!-- ====================================== Section Blog ===================================== -->
+   <section class="section-blog pt-0 position-relative" id="blog">
+      <img class="blog-gardient" src="../static/assets/images/home-page/blue-gardient5.png" alt="blue-gardient5">
+      <div class="container">
+         <h2 class="sec-heding">The Latest <span> Updates & Insights</span></h2>
+         <p class="sub-heding">Explore how AI is reshaping communication through image captioning, emotional AI, and voice synthesis — across languages and cultures.</p>
+         <div class="row home-blog-row">
+            <div class="col-xxl-4 col-xl-4 col-lg-4 col-md-6">
+               <a href="#" class="blog-box-col" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+                  <div class="blog-img-box">
+                     <img class="blog-img" src="../static/assets/images/blog-page/blog-img1.jpg" alt="blog-img1">
+                     <p class="date-blog">Mar 25, 2025</p>
+                  </div>
+                  <h2 class="eque">Empowering Accessibility with Text-to-Voice</h2>
+                  <p class="ilisis">Discover how our platform turns written content into natural-sounding speech, making information more accessible than ever.</p>
+               </a>
+            </div>
+            <div class="col-xxl-4 col-xl-4 col-lg-4 col-md-6">
+               <a href="#" class="blog-box-col" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+                  <div class="blog-img-box">
+                     <img class="blog-img" src="../static/assets/images/blog-page/blog-img2.jpg" alt="blog-img2">
+                     <p class="date-blog">Mar 18, 2025</p>
+                  </div>
+                  <h2 class="eque">From Images to Emotions: AI That Understands</h2>
+                  <p class="ilisis">We explore how our AI interprets emotions from generated captions, helping build more sensitive and human-like systems.</p>
+               </a>
+            </div>
+            <div class="col-xxl-4 col-xl-4 col-lg-4 col-md-6">
+               <a href="#" class="blog-box-col" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+                  <div class="blog-img-box">
+                     <img class="blog-img" src="../static/assets/images/blog-page/blog-img3.jpg" alt="blog-img3">
+                     <p class="date-blog">Mar 10, 2025</p>
+                  </div>
+                  <h2 class="eque">Breaking Barriers with Real-Time Language Translation</h2>
+                  <p class="ilisis">Learn how multi-language support is redefining communication across diverse audiences using AI-powered captioning.</p>
+               </a>
+            </div>
+         </div>
+      </div>
+   </section>
+   
+   <!-- ====================================== Section Footer ===================================== -->
+   <footer class="position-relative footer-main" id="contact">
+      <img class="footer-logo" src="../static/assets/images/home-page/footer-logo.png" alt="footer-logo">
+      <div class="container">
+         <div class="row">
+            <div class="col-xxl-6 col-xl-6 col-lg-5 footer-col-fir">
+               <svg class="djks" xmlns="http://www.w3.org/2000/svg" width="2" height="100" viewBox="0 0 2 100"
+                  fill="none">
+                  <path d="M1 0L0.999996 100" stroke="url(#paint0_linear_137_269)" stroke-width="2" />
+                  <defs>
+                     <linearGradient id="paint0_linear_137_269" x1="1.5" y1="2.18557e-08" x2="1.5" y2="100"
+                        gradientUnits="userSpaceOnUse">
+                        <stop stop-color="#1A1A1A" offset="0" />
+                        <stop offset="0.5" stop-color="#00FFB1" />
+                        <stop offset="1" stop-color="#1A1A1A" />
+                     </linearGradient>
+                  </defs>
+               </svg>
+               <h2 class="sec-heding advice">Get Expert Insights from <span>CaptionGenius AI</span></h2>
+               <p class="dui seci dsos">Unlock your creativity with cutting-edge AI art generation and captioning tools. Get personalized tips, updates, and early access to new features from our expert team.</p>
+               <div class="ref-demo">
+                  <a href="index-2.html" class="button"> Request a Demo
+                     <span class="hoverEffect">
+                        <span></span>
+                     </span>
+                  </a>
+               </div>
+            </div>
+            <div class="col-xxl-6 col-xl-6 col-lg-7 footer-col-sec">
+               <img class="footer-gefdo" src="../static/assets/images/home-page/blue-gardient2.png" alt="blue-gardient2">
+              
+               <div class="box-footer">
+                  <p class="resour">Quick Links</p>
+                  <ul class="foot-links">
+                     <li><a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#exampleModal">Login</a></li>
+                     <li><a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#exampleModal">Register</a></li>
+                     <li><a href="#contact">Contact</a></li>
+                 
+                  </ul>
+               </div>
+            </div>
+         </div>
+      </div>
+      <div class="coprights-main">
+         <svg class="das" xmlns="http://www.w3.org/2000/svg" width="100" height="2" viewBox="0 0 100 2" fill="none">
+            <path d="M100 1L8.49366e-07 0.999996" stroke="url(#paint0_linear_137_271)" stroke-width="2" />
+            <defs>
+               <linearGradient id="paint0_linear_137_271" x1="100" y1="1.5" x2="-2.18557e-08" y2="1.5"
+                  gradientUnits="userSpaceOnUse">
+                  <stop stop-color="#1A1A1A" offset="0" />
+                  <stop offset="0.5" stop-color="#5C33FF" />
+                  <stop offset="1" stop-color="#1A1A1A" />
+               </linearGradient>
+            </defs>
+         </svg>
+         <div class="container">
+            <div class="rights-reserved">
+               <h2>© 2025 - All rights reserved by
+                  <a href="https://1.envato.market/website-portfolio" target="_blank">TEAM KVG BE</a>
+               </h2>
+               <div class="footer-media">
+                  <a href="https://www.facebook.com/"><img src="../static/assets/images/svg/facebook.svg" alt="facebook">Facebook</a>
+                  <a href="https://www.instagram.com/"><img src="../static/assets/images/svg/insta.svg" alt="insta">Instagram</a>
+                  <a href="https://x.com/"><img src="../static/assets/images/svg/twitter.svg" alt="twitter">Twitter</a>
+                  <a href="https://www.linkedin.com/"><img src="../static/assets/images/svg/linkedin.svg" alt="linkedin">LinkedIn</a>
+               </div>
+            </div>
+         </div>
+      </div>
+   </footer>
+   
+   <!-- ====================================== Blog Pop Up ===================================== -->
+   <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+      aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+         <div class="modal-content">
+            <div class="modal-body">
+               <button type="button" class="btn-close form-close-btn" data-bs-dismiss="modal"
+                  aria-label="Close"></button>
+               <h2 class="liqua">Neque duis aliquam pellentesque nam turpis volutpat volutpat.</h2>
+               <p class="blog-main-date">Feb 25, 2025 | 04:27 PM</p>
+               <img class="blog-singl-img" src="../static/assets/images/blog-page/blog-singl-img.jpg" alt="blog-singl-img">
+               <div class="row signgle-blog-row">
+                  <div class="col-xxl-12">
+                     <p class="sodales">Proin faucibus nec mauris a sodales, sed elementum mi tincidunt. Sed eget
+                        viverra egestas nisi in consequat. Fusce sodales augue a accumsan. Cras sollicitudin,
+                        ipsum eget blandit pulvinar. Integer tincidunt. Cras dapibus. Vivamus elementum semper
+                        nisi. Aenean vulputate eleifend tellus. Aenean leo ligula, porttitor eu, consequat vitae,
+                        eleifend ac, enim.</p>
+                     <p class="sodales p-0">Sed ut perspiciatis, unde omnis iste natus error sit voluptatem
+                        accusantium doloremque laudantium, totam rem aperiam eaque ipsa, quae ab illo inventore
+                        veritatis et quasi architecto beatae vitae dicta sunt, explicabo.</p>
+                     <div class="cott-main">
+                        <svg width="60" height="46" viewBox="0 0 60 46" fill="none">
+                           <path
+                              d="M47.1132 46C51.0855 46 54.2263 44.6566 56.5358 41.9698C58.8453 39.283 60 36.1329 60 32.5196C60 30.0181 59.7691 27.7482 59.3072 25.71C58.8453 23.5791 58.1524 21.1239 57.2286 18.3444L50.9931 0H35.1963L42.4018 21.1239C39.6305 22.0504 37.5982 23.718 36.3048 26.1269C34.9192 28.5358 34.2263 30.9446 34.2263 33.3535C34.2263 36.8741 35.5196 39.8852 38.1062 42.3867C40.6005 44.7956 43.6028 46 47.1132 46ZM12.8868 46C16.8591 46 20 44.6566 22.3095 41.9698C24.6189 39.283 25.7737 36.1329 25.7737 32.5196C25.7737 30.0181 25.5427 27.7482 25.0808 25.71C24.6189 23.5791 23.9261 21.1239 23.0023 18.3444L16.7667 0H0.969978L8.17551 21.1239C5.40415 22.0504 3.37182 23.718 2.07852 26.1269C0.692837 28.5358 0 30.9446 0 33.3535C0 36.8741 1.2933 39.8852 3.87991 42.3867C6.37413 44.7956 9.37644 46 12.8868 46Z"
+                              fill="#5C33FF" />
+                        </svg>
+                        <p>Curabitur varius eros et lacus rutrum consequat. Mauris sollicitudin enim condimentum,
+                           luctus justo non, molestie nisl.</p>
+                     </div>
+                     <p class="sodales">Vitae ipsum accumsan iaculis elementum. Lorem sed et fusce risus malesuada
+                        eu cras. Semper molestie elementum magna ullamcorper dui eget dolor nibh bibendum. Eu hac
+                        amet elit netus feugiat consectetur at. Felis habitant posuere neque libero. Placerat quam
+                        eget sollicitudin faucibus id ut a id est. Elit quam nullam luctus sed aliquam sed
+                        viverra.
+                     </p>
+                     <p class="sodales p-0">Lacus risus malesuada scelerisque quis vitae libero etiam consectetur.
+                        Blandit volutpat iaculis nunc imperdiet non cursus in mi viverra. Sapien ut metus quis
+                        adipiscing vel enim. Lectus a pulvinar.</p>
+                     <div class="wildlife-img-group">
+                        <div class="wildlife-img-group-sub">
+                           <img src="../static/assets/images/blog-page/blog-singl-img2.jpg" alt="blog-singl-img2">
+                           <img src="../static/assets/images/blog-page/blog-singl-img3.jpg" alt="blog-singl-img3">
+                        </div>
+                        <img class="blog-singl-img4" src="../static/assets/images/blog-page/blog-singl-img4.jpg"
+                           alt="blog-singl-img4">
+                     </div>
+                     <p class="sodales pb-0">Sapien ullamcorper et enim imperdiet adipiscing varius. Donec blandit
+                        nulla vulputate laoreet. Semper scelerisque at vitae nec adipiscing arcu lacus volutpat
+                        accumsan. Amet magna nullam lacus aliquam auctor pulvinar in erat.</p>
+                     <h3 class="approach">Individual approach to every project</h3>
+                     <p class="sodales">Aenean et egestas nulla. Pellentesque habitant morbi tristique senectus et
+                        netus et malesuada fames ac turpis egestas. Fusce gravida, ligula non molestie tristique,
+                        justo elit blandit risus, blandit maximus augue magna accumsan ante. Duis id mi tristique,
+                        pulvinar neque at, lobortis tortor.</p>
+                     <p class="sodales">Etiam vitae leo et diam pellentesque porta. Sed eleifend ultricies risus,
+                        vel rutrum erat commodo ut. Praesent finibus congue euismod. Nullam scelerisque massa vel
+                        augue placerat, a tempor sem egestas. Curabitur placerat finibus lacus.</p>
+                     <div class="footer-media Singleblog-media">
+                        <a href="https://www.facebook.com/"><img src="../static/assets/images/svg/facebook.svg"
+                              alt="facebook">Facebook</a>
+                        <a href="https://www.instagram.com/"><img src="../static/assets/images/svg/insta.svg"
+                              alt="insta">Instagram</a>
+                        <a href="https://x.com/"><img src="../static/assets/images/svg/twitter.svg" alt="twitter">Twitter</a>
+                        <a href="https://www.linkedin.com/"><img src="../static/assets/images/svg/linkedin.svg"
+                              alt="linkedin">LinkedIn</a>
+                     </div>
+                     <div class="diamond-nextbtn-head">
+                        <div class="diamond-next-btn">
+                           <a href="#" class="diamond-btn next">
+                              <img src="../static/assets/images/svg/left-next-arrow.svg" alt="left-next-arrow">
+                           </a>
+                           <h3>PREVIOUS</h3>
+                        </div>
+                        <div class="diamond-next-btn">
+                           <h3>NEXT</h3>
+                           <a href="#" class="diamond-btn next">
+                              <img src="../static/assets/images/svg/right-prv-arrow.svg" alt="right-prv-arrow">
+                           </a>
+                        </div>
+                     </div>
+                     <form class="from-main h-auto form-siglblog">
+                        <h2 class="sec-heding quest">Leave a <span> Comment </span></h2>
+                        <p class="dui seci pb-3">Your email address will not be published. Required fields are
+                           marked*
+                        </p>
+                        <div class="leave-input">
+                           <input class="conta-input-main" type="text" placeholder="Enter your full name*"
+                              name="fullName" autocomplete="off">
+                           <input class="conta-input-main" type="text" placeholder="Enter your email address*"
+                              name="email" autocomplete="off">
+                        </div>
+                        <textarea name="message" placeholder="Comment*"></textarea>
+                        <a href="#" class="button"> Post Comment
+                           <span class="hoverEffect">
+                              <span></span>
+                           </span>
+                        </a>
+                     </form>
+                  </div>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+   <!-- ======================================  Login Sign In From ===================================== -->
+   <div class="modal fade" id="exampleModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-dialog-form">
+         <div class="modal-content">
+            <div class="modal-body form-modal-body">
+               <button type="button" class="btn-close form-close-btn" data-bs-dismiss="modal"
+                  aria-label="Close"></button>
+               <div class="container-demo">
+                  <div class="user signinBx">
+                     <div class="imgBx"><img src="../static/assets/images/home-page/form-img1.jpg" alt="form-img1"></div>
+                     <div class="formBx">
+                        <form method="post" action="/login">
+                           <h2>Sign In</h2>
+                           <input type="text" name="email" placeholder="Email" autocomplete="on" required>
+                           <input type="password" name="password" placeholder="Password" autocomplete="on" required>
+                           <button type="submit" class="button subscribeBtn">Login
+                              <span class="hoverEffect">
+                                 <span></span>
+                              </span>
+                           </button>
+                           <p class="signup">
+                              Don't have an account ?
+                              <a href="javascript:void(0);" onclick="toggleForm();">Sign Up</a>
+                           </p>
+                        </form>
+                     </div>
+                  </div>
+                  <div class="user signupBx">
+                     <div class="formBx">
+                        <form method="post" action="/register">
+                           <h2>Create an account</h2>
+                           <input type="text" name="username" placeholder="Username" autocomplete="on" reuired>
+                           <input type="email" name="email" placeholder="Email Address" autocomplete="on" required>
+                           <input type="password" name="cpass" placeholder="Create Password" autocomplete="on" reuired>
+                         
+                           <button type="submit" class="button subscribeBtn">Sign Up
+                              <span class="hoverEffect">
+                                 <span></span>
+                              </span>
+                           </button>
+                           <p class="signup">Already have an account ?
+                              <a href="javascript:void(0);" onclick="toggleForm();">Sign in</a>
+                           </p>
+                        </form>
+                     </div>
+                     <div class="imgBx"><img src="../static/assets/images/home-page/form-img2.jpg" alt=" form-img2"></div>
+                  </div>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+   <!-- ====================================== Bottom To Top Button ===================================== -->
+   <button class="bottom-top-button">&#8593;</button>
+   <!-- ====================================== Bottom To Top Button End ===================================== -->
+   <script src="../static/assets/javascript/jquery.js"></script>
+   <script src="../static/assets/javascript/smooth-scroll.js"></script>
+   <script src="../static/assets/javascript/bootstrap.min.js"></script>
+   <script src="../static/assets/javascript/gsap.js"></script>
+   <script src="../static/assets/javascript/slick.min.js"></script>
+   <script src="../static/assets/javascript/script.js"></script>
+   <script>
+      const form = document.querySelector('form');
+      const loader = document.getElementById('loader');
+   
+      form.addEventListener('submit', () => {
+         loader.style.display = 'flex';
+      });
+   </script>
+   
 </body>
+
+
+<!-- Mirrored from up2client.com/envato/ciri-ai/html/main/OnePage-CiriAI/ by HTTrack Website Copier/3.x [XR&CO'2014], Sat, 05 Apr 2025 23:33:37 GMT -->
 </html>
