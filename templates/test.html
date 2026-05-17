@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Image Caption Generator</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f4f6f8;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    h2 {
+      margin-top: 30px;
+      color: #333;
+    }
+
+    form {
+      margin-top: 20px;
+      background-color: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      width: 90%;
+      max-width: 500px;
+    }
+
+    input[type="file"] {
+      padding: 10px;
+      font-size: 14px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      width: 100%;
+      margin-bottom: 15px;
+    }
+
+    button {
+      padding: 10px 20px;
+      background-color: #007bff;
+      border: none;
+      border-radius: 5px;
+      color: white;
+      font-weight: bold;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    .image-section {
+      margin-top: 30px;
+      text-align: center;
+    }
+
+    .image-section img {
+      width: 300px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+
+    .caption-box {
+      background: #ffffff;
+      padding: 20px;
+      margin-top: 20px;
+      border-radius: 8px;
+      width: 90%;
+      max-width: 500px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .caption-box h3 {
+      margin-bottom: 10px;
+      color: #007bff;
+    }
+
+    .translation-section {
+      margin-top: 20px;
+      text-align: left;
+    }
+
+    .translation-section p {
+      font-size: 15px;
+      margin-bottom: 8px;
+    }
+
+    audio {
+      margin-top: 5px;
+      margin-bottom: 15px;
+    }
+
+    .emotion-box {
+      margin-top: 10px;
+      font-style: italic;
+      color: #555;
+    }
+
+  </style>
+</head>
+<body>
+
+  <h2>🧠 Image Caption Generator with Translation & Emotion Detection</h2>
+
+  <form method="POST" enctype="multipart/form-data">
+    <input type="file" name="image" accept="image/*" required>
+    <button type="submit">Generate Caption</button>
+  </form>
+
+  {% if image_url %}
+    <div class="image-section">
+      <img src="{{ image_url }}" alt="Uploaded Image">
+    </div>
+
+    <div class="caption-box">
+      <h3>Generated Caption</h3>
+      <p>{{ caption }}</p>
+
+      <div class="emotion-box">
+        <strong>Detected Emotion:</strong> {{ emotion }}
+      </div>
+
+      <div class="translation-section">
+        <h4>🈯 Translations + Audio:</h4>
+        {% for lang, translation in translations.items() %}
+          <p><strong>{{ lang }}:</strong> {{ translation }}</p>
+          {% if audio_paths[lang] %}
+            <audio controls>
+              <source src="{{ audio_paths[lang] }}" type="audio/mp3">
+              Your browser does not support the audio element.
+            </audio>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+  {% endif %}
+
+</body>
+</html>
